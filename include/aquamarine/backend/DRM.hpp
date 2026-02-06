@@ -303,6 +303,7 @@ namespace Aquamarine {
 
         STileInfo                                      tileInfo;
         bool                                           tilingRedundant = false;
+        Hyprutils::Math::Vector2D                      maxMode;
 
         bool                                           cursorEnabled = false;
         Hyprutils::Math::Vector2D                      cursorPos, cursorSize, cursorHotspot;

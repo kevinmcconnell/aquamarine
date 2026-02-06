@@ -797,20 +797,10 @@ void Aquamarine::CDRMBackend::markRedundantTiles() {
         // meaning the driver handles tiling internally
         SP<SDRMConnector> fullResConn;
         for (const auto& conn : members) {
-            auto drmConn = drmModeGetConnector(gpu->fd, conn->id);
-            if (!drmConn)
-                continue;
-
-            for (int i = 0; i < drmConn->count_modes; ++i) {
-                if (drmConn->modes[i].hdisplay == fullWidth && drmConn->modes[i].vdisplay == fullHeight) {
-                    fullResConn = conn;
-                    break;
-                }
-            }
-
-            drmModeFreeConnector(drmConn);
-            if (fullResConn)
+            if (conn->maxMode.x >= fullWidth && conn->maxMode.y >= fullHeight) {
+                fullResConn = conn;
                 break;
+            }
         }
 
         if (!fullResConn)
@@ -906,6 +896,12 @@ void Aquamarine::CDRMBackend::scanConnectors() {
         }
 
         conn->status = drmConn->connection;
+
+        conn->maxMode = {};
+        for (int i = 0; i < drmConn->count_modes; ++i) {
+            conn->maxMode.x = std::max<double>(conn->maxMode.x, drmConn->modes[i].hdisplay);
+            conn->maxMode.y = std::max<double>(conn->maxMode.y, drmConn->modes[i].vdisplay);
+        }
 
         if (conn->crtc)
             conn->recheckCRTCProps();
